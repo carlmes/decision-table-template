@@ -2,9 +2,19 @@ buildscript {
 	ext {
 		springBootVersion = '2.1.4.RELEASE'
 	}
+
 	repositories {
 		mavenCentral()
-	}
+		maven {
+			url 'https://maven.repository.redhat.com/ga/'
+		}
+		maven {
+			url 'https://repo1.maven.org/maven2'
+		}
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+    }
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
@@ -28,6 +38,15 @@ jar {
 
 repositories {
 	mavenCentral()
+	maven {
+		url 'https://maven.repository.redhat.com/ga/'
+	}
+	maven {
+		url 'https://repo1.maven.org/maven2'
+	}
+	maven {
+		url "https://plugins.gradle.org/m2/"
+	}
 }
 
 ext {
@@ -54,11 +73,11 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-web')
 
-	compile group: 'org.kie', name: 'kie-ci', version: '7.14.0.Final'
-	compile group: 'org.kie', name: 'kie-api', version: '7.14.0.Final'
-	compile group: 'org.drools', name: 'drools-decisiontables', version: '7.14.0.Final'
-	compile group: 'org.jbpm', name: 'jbpm-bpmn2', version: '7.14.0.Final'
-	compile group: 'org.drools', name: 'drools-core', version: '7.14.0.Final'
+	compile group: 'org.kie', name: 'kie-ci', version: '7.14.0.Final-redhat-00002'
+	compile group: 'org.kie', name: 'kie-api', version: '7.14.0.Final-redhat-00002'
+	compile group: 'org.drools', name: 'drools-decisiontables', version: '7.14.0.Final-redhat-00002'
+	compile group: 'org.jbpm', name: 'jbpm-bpmn2', version: '7.14.0.Final-redhat-00002'
+	compile group: 'org.drools', name: 'drools-core', version: '7.14.0.Final-redhat-00002'
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
