@@ -22,6 +22,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * JUnit test to figure out how to get the Decision Table Template working with ExternalSpreadsheetCompiler
+ * 
+ * Useful resources:
+ *    https://docs.jboss.org/drools/release/latestFinal/drools-docs/html_single/#_rule_templates
+ *    https://access.redhat.com/solutions/2048283
+ *    https://stackoverflow.com/a/46159667
+ *    https://www.programcreek.com/java-api-examples/?code=IncQueryLabs/smarthome-cep-demonstrator/smarthome-cep-demonstrator-master/runtime/com.incquerylabs.smarthome.eventbus.ruleengine.drools/src/main/java/com/incquerylabs/smarthome/eventbus/ruleengine/drools/DroolsEventBusClient.java
+ */
+
 public class TestDecisionTableBuild {
 
 	private KieServices kieServices = KieServices.Factory.get();
@@ -151,5 +161,3 @@ public class TestDecisionTableBuild {
 		assert ( true );
 	}
 }
-
-// More tips on this support ticket: https://access.redhat.com/solutions/2048283
