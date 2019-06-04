@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
 public class TestDecisionTableBuild {
 	
 	private KieServices kieServices = KieServices.Factory.get();
@@ -33,7 +32,8 @@ public class TestDecisionTableBuild {
 	@Test
 	public void testSomeLibraryMethod() {
 
-		// Build the KJar
+		// Define the resources
+		// --------------------
 
 		List<Resource> rulesResources = new ArrayList<Resource>();
 
@@ -154,3 +154,5 @@ public class TestDecisionTableBuild {
 		assert ( true );
 	}
 }
+
+// More tips on this support ticket: https://access.redhat.com/solutions/2048283
