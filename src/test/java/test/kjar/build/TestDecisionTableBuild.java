@@ -8,7 +8,6 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.Message;
-import org.kie.api.builder.ReleaseId;
 import org.kie.api.builder.model.KieModuleModel;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
@@ -19,16 +18,14 @@ import org.kie.internal.builder.DecisionTableInputType;
 import org.kie.internal.builder.KnowledgeBuilderFactory;
 import org.kie.internal.io.ResourceFactory;
 
-import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TestDecisionTableBuild {
-	
+
 	private KieServices kieServices = KieServices.Factory.get();
-	
+
 	@Test
 	public void testSomeLibraryMethod() {
 
@@ -68,7 +65,7 @@ public class TestDecisionTableBuild {
 		 * Aargh, it seems that the logic at the top of this function that tests for the existence of Decision Table Configuration is not working.	
 		 * 
 		 */
-		
+
 		Resource xlsxResource = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/ExamplePolicyPricingTemplateData.xls" ) );
 		xlsxResource.setResourceType( ResourceType.DTABLE );
 		xlsxResource.setTargetPath( xlsxResource.getResourceType().getDefaultPath() + "/" + new File( xlsxResource.getSourcePath() ).getName() );
@@ -77,18 +74,18 @@ public class TestDecisionTableBuild {
 		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( drtResource, 2, 1 );
 		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
 		rulesResources.add( xlsxResource );
-		
+
 		/*
 		 * Note: if you comment out the block of code above, and run it, then it works fine. 
 		 * Rule 01 has a basic System.out.println() that will print to the console to verify rules running ok.
 		 */
-		
+
 
 		// Start the build process
 		// -----------------------
 
 		AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0" );
-		log.info( "Building the KJar: {}", releaseId );
+		System.out.println( "Building the KJar: " + releaseId );
 
 		// Generate the Pom file contents
 		// ------------------------------
@@ -103,34 +100,34 @@ public class TestDecisionTableBuild {
 		// Create the KJar
 		// ---------------
 
-		log.debug( "Defining KJAR kbase and kie session model." );
+		System.out.println( "Defining KJAR kbase and kie session model." );
 		KieModuleModel kproj = kieServices.newKieModuleModel();
 
 		KieFileSystem kfs = kieServices.newKieFileSystem();
 
-		log.debug( "Writing resource: {}", "kmodule.xml" );
+		System.out.println( "Writing resource: " + "kmodule.xml" );
 		kfs.writeKModuleXML( kproj.toXML() );
 
-		log.debug( "Writing resource: {}", "pom.xml" );
+		System.out.println( "Writing resource: " + "pom.xml" );
 		kfs.writePomXML( pom );
 
 		for ( Resource resource : rulesResources ) {
-			log.debug( "Writing resource: {}", resource.getTargetPath() );
+			System.out.println( "Writing resource: " + resource.getTargetPath() );
 			kfs.write( resource );
 		}
 
 		// Build it
 		// --------
-		
-		log.info( "Building the new KJar" );
-		log.info( "---------------------" );
+
+		System.out.println( "Building the new KJar" );
+		System.out.println( "---------------------" );
 
 		KieBuilder kieBuilder = kieServices.newKieBuilder( kfs ).buildAll();
-		
-	    List<Message> errors = kieBuilder.getResults().getMessages( Message.Level.ERROR );
+
+		List<Message> errors = kieBuilder.getResults().getMessages( Message.Level.ERROR );
 		if ( errors.size() > 0 ) {
 			for ( Message errorMessage : errors ) {
-				log.error( errorMessage.toString() );
+				System.out.println( errorMessage.toString() );
 			}
 			throw new IllegalArgumentException( "Could not parse knowledge." );
 		}
@@ -140,17 +137,17 @@ public class TestDecisionTableBuild {
 		// Run it
 		// ------
 
-		log.info( "Running the rules" );
-		log.info( "-----------------" );
-		
-	    KieContainer kieContainer = kieServices.newKieContainer( internalKieModule.getReleaseId() );
+		System.out.println( "Running the rules" );
+		System.out.println( "-----------------" );
 
-        KieBase kieBase = kieContainer.getKieBase();
-        KieSession kieSession = kieContainer.newKieSession();
+		KieContainer kieContainer = kieServices.newKieContainer( internalKieModule.getReleaseId() );
 
-        log.info( "Execution result: {}", kieSession.fireAllRules() );
+		KieBase kieBase = kieContainer.getKieBase();
+		KieSession kieSession = kieContainer.newKieSession();
 
-		log.info( "TEST COMPLETED" );
+		System.out.println( "Execution result: " + kieSession.fireAllRules() );
+
+		System.out.println( "TEST COMPLETED" );
 		assert ( true );
 	}
 }
