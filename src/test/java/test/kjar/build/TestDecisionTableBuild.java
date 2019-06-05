@@ -2,6 +2,8 @@ package test.kjar.build;
 
 import org.appformer.maven.support.AFReleaseId;
 import org.drools.compiler.kie.builder.impl.InternalKieModule;
+import org.drools.examples.decisiontable.Driver;
+import org.drools.examples.decisiontable.Policy;
 import org.junit.Test;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -46,18 +48,13 @@ public class TestDecisionTableBuild {
 
 		Resource example1 = ResourceFactory.newFileResource( new File( "src/main/resources/other-rules/Example1.drl" ) );
 		example1.setResourceType( ResourceType.determineResourceType( example1.getSourcePath() ) );
-		example1.setTargetPath( example1.getResourceType().getDefaultPath() + "/" + new File( example1.getSourcePath() ).getName() );
+		example1.setTargetPath( "org/drools/examples/banking/" + new File( example1.getSourcePath() ).getName() );
 		rulesResources.add( example1 );
 
 		Resource example2 = ResourceFactory.newFileResource( new File( "src/main/resources/other-rules/Example2.drl" ) );
 		example2.setResourceType( ResourceType.determineResourceType( example2.getSourcePath() ) );
-		example2.setTargetPath( example2.getResourceType().getDefaultPath() + "/" + new File( example2.getSourcePath() ).getName() );
+		example2.setTargetPath( "org/drools/examples/banking/" + new File( example2.getSourcePath() ).getName() );
 		rulesResources.add( example2 );
-
-		Resource drtResource = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/BasePricing.drt" ) );
-		drtResource.setResourceType( ResourceType.DRT );
-		drtResource.setTargetPath( drtResource.getResourceType().getDefaultPath() + "/" + new File( drtResource.getSourcePath() ).getName() );
-		rulesResources.add( drtResource );
 
 		/*
 		 * Debug notes: 
@@ -78,17 +75,17 @@ public class TestDecisionTableBuild {
 
 		Resource xlsxResource = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/ExamplePolicyPricingTemplateData.xls" ) );
 		xlsxResource.setResourceType( ResourceType.DTABLE );
-		xlsxResource.setTargetPath( xlsxResource.getResourceType().getDefaultPath() + "/" + new File( xlsxResource.getSourcePath() ).getName() );
+		xlsxResource.setTargetPath( new File( xlsxResource.getSourcePath() ).getName() );
+		
 		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
 		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
-		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( drtResource, 2, 1 );
+		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( 
+				ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/BasePricing.drt" ) ), 3, 3 );
+		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( 
+				ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/PromotionalPricing.drt" ) ), 18, 3 );
+		
 		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
 		rulesResources.add( xlsxResource );
-
-		/*
-		 * Note: if you comment out the block of code above, and run it, then it works fine. 
-		 * Rule 01 has a basic System.out.println() that will print to the console to verify rules running ok.
-		 */
 
 
 		// Start the build process
@@ -97,6 +94,7 @@ public class TestDecisionTableBuild {
 		AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0" );
 		System.out.println( "Building the KJar: " + releaseId );
 
+		
 		// Generate the Pom file contents
 		// ------------------------------
 
@@ -106,6 +104,7 @@ public class TestDecisionTableBuild {
 			+ "  <modelVersion>4.0.0</modelVersion>\n" + "\n" + "  <groupId>" + releaseId.getGroupId()
 			+ "</groupId>\n" + "  <artifactId>" + releaseId.getArtifactId() + "</artifactId>\n" + "  <version>"
 			+ releaseId.getVersion() + "</version>\n" + "\n" + "</project>";
+		
 
 		// Create the KJar
 		// ---------------
@@ -125,6 +124,7 @@ public class TestDecisionTableBuild {
 			System.out.println( "Writing resource: " + resource.getTargetPath() );
 			kfs.write( resource );
 		}
+		
 
 		// Build it
 		// --------
@@ -143,6 +143,7 @@ public class TestDecisionTableBuild {
 		}
 
 		InternalKieModule internalKieModule = (InternalKieModule) kieBuilder.getKieModule();
+		
 
 		// Run it
 		// ------
@@ -154,9 +155,25 @@ public class TestDecisionTableBuild {
 
 		KieBase kieBase = kieContainer.getKieBase();
 		KieSession kieSession = kieContainer.newKieSession();
+		
+        //now create some test data
+        Driver driver = new Driver();
+        driver.setName( "Tim" );
+        driver.setAge( 19 );
+        driver.setPriorClaims( 0 );
+        driver.setLocationRiskProfile( "LOW" );
+        kieSession.insert(driver);
+        
+        Policy policy = new Policy();
+        policy.setType( "COMPREHENSIVE" );
+        kieSession.insert(policy);
 
-		System.out.println( "Execution result: " + kieSession.fireAllRules() );
+		kieSession.fireAllRules();
+		
+        System.out.println("BASE PRICE IS: " + policy.getBasePrice());
+        System.out.println("DISCOUNT IS: " + policy.getDiscountPercent());   
 
+        kieSession.dispose();
 		System.out.println( "TEST COMPLETED" );
 		assert ( true );
 	}
