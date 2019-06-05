@@ -55,7 +55,17 @@ public class TestDecisionTableBuild {
 		example2.setResourceType( ResourceType.determineResourceType( example2.getSourcePath() ) );
 		example2.setTargetPath( "org/drools/examples/banking/" + new File( example2.getSourcePath() ).getName() );
 		rulesResources.add( example2 );
-
+		
+		Resource baseDRT = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/BasePricing.drt" ) );
+		baseDRT.setResourceType( ResourceType.determineResourceType( baseDRT.getSourcePath() ) );
+		baseDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( baseDRT.getSourcePath() ).getName() );
+		rulesResources.add( baseDRT );
+		
+		Resource promoDRT = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/PromotionalPricing.drt" ) );
+		promoDRT.setResourceType( ResourceType.determineResourceType( promoDRT.getSourcePath() ) );
+		promoDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( promoDRT.getSourcePath() ).getName() );
+		rulesResources.add( promoDRT );
+		
 		/*
 		 * Debug notes: 
 		 * 
@@ -79,10 +89,9 @@ public class TestDecisionTableBuild {
 		
 		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
 		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
-		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( 
-				ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/BasePricing.drt" ) ), 3, 3 );
-		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( 
-				ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/PromotionalPricing.drt" ) ), 18, 3 );
+		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( baseDRT, 3, 3 );
+		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( promoDRT, 18, 3 );
+		xlsxDecisionTableConfiguration.setTrimCell( false );
 		
 		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
 		rulesResources.add( xlsxResource );
