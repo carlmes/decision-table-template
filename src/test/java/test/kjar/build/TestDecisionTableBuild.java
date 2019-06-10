@@ -71,7 +71,15 @@ public class TestDecisionTableBuild {
 		xlsxResource.setTargetPath( new File( xlsxResource.getSourcePath() ).getName() );
 		
 		/*
-		 * This method of configuration is NOT saved in the KJar
+		 * Note: This method of configuration is NOT saved in the KJar.
+		 *       ------------------------------------------------------
+		 *       
+		 * This is because the properties will not be written, since the toProperties() and 
+		 * fromProperties() methods don't include "templates" and "trimCell" attributes.
+		 * 
+		 * See: https://github.com/kiegroup/drools/pull/2377
+		 * 
+		 * Fix was NOT accepted, so cannot use this.
 		 * 
 		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
 		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
