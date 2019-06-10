@@ -5,8 +5,9 @@ import org.drools.compiler.kie.builder.impl.InternalKieModule;
 import org.drools.examples.decisiontable.Driver;
 import org.drools.examples.decisiontable.Policy;
 import org.drools.examples.decisiontable.RuleName;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
-import org.kie.api.KieBase;
+import org.junit.runners.MethodSorters;
 import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
@@ -23,9 +24,10 @@ import org.kie.internal.builder.DecisionTableInputType;
 import org.kie.internal.builder.KnowledgeBuilderFactory;
 import org.kie.internal.io.ResourceFactory;
 import org.kie.scanner.KieMavenRepository;
+import org.springframework.core.annotation.Order;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -44,12 +46,19 @@ import java.util.List;
  *    https://github.com/kiegroup/drools/blob/master/drools-examples/src/main/resources/META-INF/kmodule.xml#L77
  */
 
+@FixMethodOrder( MethodSorters.NAME_ASCENDING )
 public class TestDecisionTableBuild {
 
 	private KieServices kieServices = KieServices.Factory.get();
+	private AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0" );
 
 	@Test
-	public void testSomeLibraryMethod() {
+	public void buildKJarTest() {
+		
+		// Remove any previously compiled artifact
+		// ---------------------------------------
+		
+		KieMavenRepository.getKieMavenRepository().removeLocalArtifact( releaseId );
 
 		// Define the resources
 		// --------------------
@@ -65,12 +74,12 @@ public class TestDecisionTableBuild {
 		example2.setResourceType( ResourceType.determineResourceType( example2.getSourcePath() ) );
 		example2.setTargetPath( "org/drools/examples/banking/" + new File( example2.getSourcePath() ).getName() );
 		rulesResources.add( example2 );
-		
+
 		Resource baseDRT = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/BasePricing.drt" ) );
 		baseDRT.setResourceType( ResourceType.determineResourceType( baseDRT.getSourcePath() ) );
 		baseDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( baseDRT.getSourcePath() ).getName() );
 		rulesResources.add( baseDRT );
-		
+
 		Resource promoDRT = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/PromotionalPricing.drt" ) );
 		promoDRT.setResourceType( ResourceType.determineResourceType( promoDRT.getSourcePath() ) );
 		promoDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( promoDRT.getSourcePath() ).getName() );
@@ -85,7 +94,7 @@ public class TestDecisionTableBuild {
 		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( promoDRT, 18, 3 );
 		xlsxDecisionTableConfiguration.setTrimCell( false );		
 		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
-		
+
 		rulesResources.add( xlsxResource );
 
 		Resource trimcellDRT = ResourceFactory.newFileResource( new File( "src/main/resources/trimCell-template-test/trim-cell-test.drt" ) );
@@ -96,7 +105,7 @@ public class TestDecisionTableBuild {
 		Resource trimcellXLSX = ResourceFactory.newFileResource( new File( "src/main/resources/trimCell-template-test/trim-cell-test.xlsx" ) );
 		trimcellXLSX.setResourceType( ResourceType.DTABLE );
 		trimcellXLSX.setTargetPath( "org/drools/examples/decisiontable-template/" + new File( trimcellXLSX.getSourcePath() ).getName() );
-		
+
 		/*
 		 * Note: This method of configuration is NOT saved in the KJar.
 		 *       ------------------------------------------------------
@@ -117,12 +126,7 @@ public class TestDecisionTableBuild {
 
 		trimcellXLSX.setConfiguration( trimCellConfig );		
 		rulesResources.add( trimcellXLSX );
-		
 
-		// Generate a new Maven ReleaseId
-		// ------------------------------
-
-		AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0-" + LocalDateTime.now() );
 
 		
 		// Generate the pom.xml
@@ -197,14 +201,11 @@ public class TestDecisionTableBuild {
 
 		System.out.println( "\nInstalled artifact: " + releaseId );
 
+		assert( true );
+	}
 
-		// Run it
-		// ------
-
-		System.out.println( "\n" );
-		System.out.println( "Running the rules" );
-		System.out.println( "-----------------" );
-
+	@Test
+	public void runSampleDecisionTableRules() {
 		ReleaseId kieReleaseId = kieServices.newReleaseId( releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion() );		
 		System.out.println( "\nRunning rules using version: " + kieReleaseId + "\n");
 
@@ -228,15 +229,35 @@ public class TestDecisionTableBuild {
 
 		// Verify that the example templates (BasePrice and PromotionalPricing) ran successfully        
 		System.out.println( "BASE PRICE IS: " + policy.getBasePrice() );
-		assertThat( policy.getBasePrice(), is( 150 ) );        
+		assertEquals( policy.getBasePrice(), 150 );        
 		System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
-		assertThat( policy.getDiscountPercent(), is( 1 ) );
+		assertEquals( policy.getDiscountPercent(), 1 );
 		
 		// Verify that the trimCell template test ran successfully        
 		Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
 		System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
-		assertThat( ruleNames.size(), is( 2 ) );   
+		assertEquals( ruleNames.size(), 2 );   
 
 		kieSession.dispose();
 	}
+	
+	@Test
+	public void runTrimCellTests() {
+		ReleaseId kieReleaseId = kieServices.newReleaseId( releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion() );		
+		System.out.println( "\nRunning rules using version: " + kieReleaseId + "\n");
+
+		kieServices.newEnvironment();
+		KieContainer kieContainer = kieServices.newKieContainer( kieReleaseId );
+		KieSession kieSession = kieContainer.newKieSession();
+
+		kieSession.fireAllRules();
+
+		// Verify that the trimCell template test ran successfully
+		Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
+		System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
+		assertEquals( ruleNames.size(), 2 );   
+
+		kieSession.dispose();
+	}
+
 }

@@ -15,7 +15,7 @@ buildscript {
 			url "https://plugins.gradle.org/m2/"
 		}
 		mavenLocal()
-    }
+	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
 	}
@@ -28,9 +28,9 @@ apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
 eclipse {
-    classpath {
-       downloadSources=true
-    }
+	classpath {
+		downloadSources=true
+	}
 }
 
 group = 'test.kjar.build'
