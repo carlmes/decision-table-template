@@ -46,7 +46,7 @@ public class TestDecisionTableBuild {
 
 		List<Resource> rulesResources = new ArrayList<Resource>();
 
-		Resource example1 = ResourceFactory.newFileResource( new File( "src/main/resources/other-rules/Example1.drl" ) );
+		Resource example1 = ResourceFactory.newFileResource( "src/main/resources/other-rules/Example1.drl" );
 		example1.setResourceType( ResourceType.determineResourceType( example1.getSourcePath() ) );
 		example1.setTargetPath( "org/drools/examples/banking/" + new File( example1.getSourcePath() ).getName() );
 		rulesResources.add( example1 );
@@ -65,35 +65,22 @@ public class TestDecisionTableBuild {
 		promoDRT.setResourceType( ResourceType.determineResourceType( promoDRT.getSourcePath() ) );
 		promoDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( promoDRT.getSourcePath() ).getName() );
 		rulesResources.add( promoDRT );
-		
-		/*
-		 * Debug notes: 
-		 * 
-		 * The following code block attempts to add the decision table resource using a template, but the buildAll()
-		 * throws a NullPointerException. When examining the stack trace shows that the code reaches this method:
-		 * 
-		 * KnowledgeBuilderImpl.decisionTableToPackageDescr() 
-		 * 
-		 * https://github.com/kiegroup/drools/blob/7.14.0.Final/drools-compiler/src/main/java/org/drools/compiler/builder/impl/KnowledgeBuilderImpl.java#L371
-		 * 
-		 * It's supposed to call the DecisionTableFactory.loadFromInputStreamWithTemplates(resource, dtableConfiguration) on line 379
-		 * But instead it's reaching the DecisionTableFactory.loadFromResource(resource, dtableConfiguration) method on line 397
-		 * 
-		 * Aargh, it seems that the logic at the top of this function that tests for the existence of Decision Table Configuration is not working.	
-		 * 
-		 */
 
 		Resource xlsxResource = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/ExamplePolicyPricingTemplateData.xls" ) );
 		xlsxResource.setResourceType( ResourceType.DTABLE );
 		xlsxResource.setTargetPath( new File( xlsxResource.getSourcePath() ).getName() );
 		
+		/*
+		 * This method of configuration is NOT saved in the KJar
+		 * 
 		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
 		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
 		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( baseDRT, 3, 3 );
 		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( promoDRT, 18, 3 );
-		xlsxDecisionTableConfiguration.setTrimCell( false );
-		
+		xlsxDecisionTableConfiguration.setTrimCell( false );		
 		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
+		*/
+		
 		rulesResources.add( xlsxResource );
 
 
@@ -120,6 +107,13 @@ public class TestDecisionTableBuild {
 
 		System.out.println( "Defining KJAR kbase and kie session model." );
 		KieModuleModel kproj = kieServices.newKieModuleModel();
+		
+		kproj.newKieBaseModel( "KB" ).setDefault( true ) 
+			.addRuleTemplate( "ExamplePolicyPricingTemplateData.xls", "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
+			.addRuleTemplate( "ExamplePolicyPricingTemplateData.xls", "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
+			.newKieSessionModel( "KS" ).setDefault( true );
+		
+		System.out.println( "kmodule: \n\n" + kproj.toXML() + "\n" );
 
 		KieFileSystem kfs = kieServices.newKieFileSystem();
 

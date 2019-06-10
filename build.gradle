@@ -86,7 +86,8 @@ dependencies {
 	compile group: 'org.kie', name: 'kie-api', version:  '7.18.0.Final-redhat-00004'
 	compile group: 'org.drools', name: 'drools-decisiontables', version:  '7.18.0.Final-redhat-00004'
 	compile group: 'org.jbpm', name: 'jbpm-bpmn2', version:  '7.18.0.Final-redhat-00004'
-	compile group: 'org.drools', name: 'drools-core', version: '7.18.0.Final-redhat-CARL'
+	//compile group: 'org.drools', name: 'drools-core', version: '7.18.0.Final-redhat-CARL'
+	compile group: 'org.drools', name: 'drools-core', version: '7.18.0.Final-redhat-00004'
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
