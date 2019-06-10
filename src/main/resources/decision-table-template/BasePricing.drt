@@ -23,6 +23,6 @@ rule "Pricing bracket_@{row.rowNumber}"
         policy: Policy(type == "@{policyType}")
     then
         policy.setBasePrice(@{base});
-        System.out.println("@{reason}");
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!! REASON: @{reason} !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 end
 end template
