@@ -15,6 +15,7 @@ rule "@{RULE_NAME}_@{row.rowNumber}"
 		System.out.println( "Sometimes empty cell: @{EMPTY_CELL}" );   // This is omitted if trimCell == true and EMPTY_CELL is empty
 		
 		if ( "@{EMPTY_CELL}" == "@{EMPTY_CELL}" ) {                    // This causes Rule Compilation errors when EMPTY_CELL is empty
+		//if ( "null" == "null" ) {
 			RuleName ruleName = new RuleName();
 			ruleName.setRuleName( "@{RULE_NAME}" );
 			insert( ruleName );

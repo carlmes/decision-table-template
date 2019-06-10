@@ -50,8 +50,8 @@ public class TestDecisionTableBuild {
 	@Test
 	public void buildKJarTest() {
 		
-		// Remove any previously compiled artifact
-		// ---------------------------------------
+		// Remove any previously installed artifact
+		// ----------------------------------------
 		
 		KieMavenRepository.getKieMavenRepository().removeLocalArtifact( releaseId );
 
@@ -101,6 +101,10 @@ public class TestDecisionTableBuild {
 		trimcellXLSX.setResourceType( ResourceType.DTABLE );
 		trimcellXLSX.setTargetPath( "org/drools/examples/decisiontable-template/" + new File( trimcellXLSX.getSourcePath() ).getName() );
 
+		DecisionTableConfiguration trimCellConfig = KnowledgeBuilderFactory.newDecisionTableConfiguration();
+		trimCellConfig.setInputType( DecisionTableInputType.XLS );
+		trimCellConfig.addRuleTemplateConfiguration( baseDRT, 2, 1 );
+
 		/*
 		 * Note: This method of configuration is NOT saved in the KJar.
 		 *       ------------------------------------------------------
@@ -108,15 +112,12 @@ public class TestDecisionTableBuild {
 		 * This is because the properties will not be written, since the toProperties() and 
 		 * fromProperties() methods don't include "templates" and "trimCell" attributes.
 		 * 
+		 * The "templates" can be defined using kmodule.xml configuration, but not "trimCell"
+		 * 
 		 * See: https://github.com/kiegroup/drools/pull/2377
 		 * 
 		 * Fix was NOT accepted, so cannot use this?
-		 * 
 		 */
-
-		DecisionTableConfiguration trimCellConfig = KnowledgeBuilderFactory.newDecisionTableConfiguration();
-		trimCellConfig.setInputType( DecisionTableInputType.XLS );
-		trimCellConfig.addRuleTemplateConfiguration( baseDRT, 2, 1 );
 		trimCellConfig.setTrimCell( false );	
 
 		trimcellXLSX.setConfiguration( trimCellConfig );		
@@ -222,18 +223,19 @@ public class TestDecisionTableBuild {
 
 		kieSession.fireAllRules();
 
-		// Verify that the example templates (BasePrice and PromotionalPricing) ran successfully        
+		// Verify that the example templates (BasePrice and PromotionalPricing) ran successfully
 		System.out.println( "BASE PRICE IS: " + policy.getBasePrice() );
-		assertEquals( policy.getBasePrice(), 150 );        
+		assertEquals( policy.getBasePrice(), 150 );
+
 		System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
 		assertEquals( policy.getDiscountPercent(), 1 );
 
 		kieSession.dispose();
 	}
-	
+
 	@Test
 	public void runTrimCellTests() {
-		ReleaseId kieReleaseId = kieServices.newReleaseId( releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion() );		
+		ReleaseId kieReleaseId = kieServices.newReleaseId( releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion() );
 		System.out.println( "\nRunning rules using version: " + kieReleaseId + "\n");
 
 		kieServices.newEnvironment();
@@ -245,7 +247,7 @@ public class TestDecisionTableBuild {
 		// Verify that the trimCell template test ran successfully
 		Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
 		System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
-		
+
 		assertEquals( ruleNames.size(), 2 );	// Two of the three rules have empty (blank) cells
 
 		kieSession.dispose();
