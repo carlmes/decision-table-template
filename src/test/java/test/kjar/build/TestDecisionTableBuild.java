@@ -4,6 +4,7 @@ import org.appformer.maven.support.AFReleaseId;
 import org.drools.compiler.kie.builder.impl.InternalKieModule;
 import org.drools.examples.decisiontable.Driver;
 import org.drools.examples.decisiontable.Policy;
+import org.drools.examples.decisiontable.RuleName;
 import org.junit.Test;
 import org.kie.api.KieBase;
 import org.kie.api.KieServices;
@@ -14,6 +15,7 @@ import org.kie.api.builder.ReleaseId;
 import org.kie.api.builder.model.KieModuleModel;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
+import org.kie.api.runtime.ClassObjectFilter;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.kie.internal.builder.DecisionTableConfiguration;
@@ -28,6 +30,7 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /*
@@ -76,6 +79,23 @@ public class TestDecisionTableBuild {
 		Resource xlsxResource = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/ExamplePolicyPricingTemplateData.xls" ) );
 		xlsxResource.setResourceType( ResourceType.DTABLE );
 		xlsxResource.setTargetPath( "org/drools/examples/decisiontable-template/" + new File( xlsxResource.getSourcePath() ).getName() );
+		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
+		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
+		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( baseDRT, 3, 3 );
+		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( promoDRT, 18, 3 );
+		xlsxDecisionTableConfiguration.setTrimCell( false );		
+		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
+		
+		rulesResources.add( xlsxResource );
+
+		Resource trimcellDRT = ResourceFactory.newFileResource( new File( "src/main/resources/trimCell-template-test/trim-cell-test.drt" ) );
+		trimcellDRT.setResourceType( ResourceType.determineResourceType( trimcellDRT.getSourcePath() ) );
+		trimcellDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( trimcellDRT.getSourcePath() ).getName() );
+		rulesResources.add( trimcellDRT );
+
+		Resource trimcellXLSX = ResourceFactory.newFileResource( new File( "src/main/resources/trimCell-template-test/trim-cell-test.xlsx" ) );
+		trimcellXLSX.setResourceType( ResourceType.DTABLE );
+		trimcellXLSX.setTargetPath( "org/drools/examples/decisiontable-template/" + new File( trimcellXLSX.getSourcePath() ).getName() );
 		
 		/*
 		 * Note: This method of configuration is NOT saved in the KJar.
@@ -90,21 +110,19 @@ public class TestDecisionTableBuild {
 		 * 
 		 */
 		
-		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
-		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
-		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( baseDRT, 3, 3 );
-		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( promoDRT, 18, 3 );
-		xlsxDecisionTableConfiguration.setTrimCell( false );		
-		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
+		DecisionTableConfiguration trimCellConfig = KnowledgeBuilderFactory.newDecisionTableConfiguration();
+		trimCellConfig.setInputType( DecisionTableInputType.XLS );
+		trimCellConfig.addRuleTemplateConfiguration( baseDRT, 2, 1 );
+		trimCellConfig.setTrimCell( false );	
+
+		trimcellXLSX.setConfiguration( trimCellConfig );		
+		rulesResources.add( trimcellXLSX );
 		
-		rulesResources.add( xlsxResource );
 
-
-		// Start the build process
-		// -----------------------
+		// Generate a new Maven ReleaseId
+		// ------------------------------
 
 		AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0-" + LocalDateTime.now() );
-		System.out.println( "Building the KJar: " + releaseId );
 
 		
 		// Generate the pom.xml
@@ -129,6 +147,8 @@ public class TestDecisionTableBuild {
 					          "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
 					          "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
+			.addRuleTemplate( "org/drools/examples/decisiontable-template/trim-cell-test.xlsx", 
+			          		  "org/drools/examples/decisiontable/trim-cell-test.drt", 2, 1 ) 
 			.newKieSessionModel( "KS" ).setDefault( true );
 	
 		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );		
@@ -206,12 +226,17 @@ public class TestDecisionTableBuild {
 
 		kieSession.fireAllRules();
 
-        kieSession.dispose();
-
+        // Verify that the example templates (BasePrice and PromotionalPricing) ran successfully        
         System.out.println( "BASE PRICE IS: " + policy.getBasePrice() );
-        assertThat( policy.getBasePrice(), is( 150 ) );
-        
+        assertThat( policy.getBasePrice(), is( 150 ) );        
         System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
         assertThat( policy.getDiscountPercent(), is( 1 ) );
+        
+        // Verify that the trimCell template test ran successfully        
+        Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
+        System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
+        assertThat( ruleNames.size(), is( 2 ) );   
+        
+        kieSession.dispose();
 	}
 }

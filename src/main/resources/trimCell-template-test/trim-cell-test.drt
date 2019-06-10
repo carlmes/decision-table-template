@@ -1,0 +1,24 @@
+template header
+RULE_NAME
+FULL_CELL
+EMPTY_CELL
+
+package org.drools.examples.decisiontable;
+
+template "Trim Cell Test"
+
+rule "@{RULE_NAME}_@{row.rowNumber}"
+    when
+    	eval( "@{EMPTY_CELL}" == "null" )
+    then
+    	System.out.println( "Template included rule: @{RULE_NAME}" );
+    	System.out.println( "Sometimes empty cell: @{EMPTY_CELL}" );   // This is omitted if trimCell == true and EMPTY_CELL is empty
+    	
+    	if ( "@{EMPTY_CELL}" == "@{EMPTY_CELL}" ) {                    // This causes Rule Compilation errors when EMPTY_CELL is empty
+	    	RuleName ruleName = new RuleName();
+	    	ruleName.setRuleName( "@{RULE_NAME}" );
+	    	insert( ruleName );        
+	    }    
+end
+
+end template
