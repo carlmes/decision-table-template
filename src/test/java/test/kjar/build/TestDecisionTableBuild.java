@@ -144,11 +144,11 @@ public class TestDecisionTableBuild {
 		KieModuleModel kproj = kieServices.newKieModuleModel();
 		kproj.newKieBaseModel( "KB" ).setDefault( true ) 
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
-					          "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
+			                  "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
-					          "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
+			                  "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/trim-cell-test.xlsx", 
-			          		  "org/drools/examples/decisiontable/trim-cell-test.drt", 2, 1 ) 
+			                  "org/drools/examples/decisiontable/trim-cell-test.drt", 2, 1 ) 
 			.newKieSessionModel( "KS" ).setDefault( true );
 
 		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );
