@@ -10,6 +10,7 @@ import org.kie.api.KieServices;
 import org.kie.api.builder.KieBuilder;
 import org.kie.api.builder.KieFileSystem;
 import org.kie.api.builder.Message;
+import org.kie.api.builder.ReleaseId;
 import org.kie.api.builder.model.KieModuleModel;
 import org.kie.api.io.Resource;
 import org.kie.api.io.ResourceType;
@@ -19,8 +20,13 @@ import org.kie.internal.builder.DecisionTableConfiguration;
 import org.kie.internal.builder.DecisionTableInputType;
 import org.kie.internal.builder.KnowledgeBuilderFactory;
 import org.kie.internal.io.ResourceFactory;
+import org.kie.scanner.KieMavenRepository;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,7 +75,7 @@ public class TestDecisionTableBuild {
 
 		Resource xlsxResource = ResourceFactory.newFileResource( new File( "src/main/resources/decision-table-template/ExamplePolicyPricingTemplateData.xls" ) );
 		xlsxResource.setResourceType( ResourceType.DTABLE );
-		xlsxResource.setTargetPath( new File( xlsxResource.getSourcePath() ).getName() );
+		xlsxResource.setTargetPath( "org/drools/examples/decisiontable-template/" + new File( xlsxResource.getSourcePath() ).getName() );
 		
 		/*
 		 * Note: This method of configuration is NOT saved in the KJar.
@@ -80,15 +86,16 @@ public class TestDecisionTableBuild {
 		 * 
 		 * See: https://github.com/kiegroup/drools/pull/2377
 		 * 
-		 * Fix was NOT accepted, so cannot use this.
+		 * Fix was NOT accepted, so cannot use this?
 		 * 
+		 */
+		
 		DecisionTableConfiguration xlsxDecisionTableConfiguration = KnowledgeBuilderFactory.newDecisionTableConfiguration();
 		xlsxDecisionTableConfiguration.setInputType( DecisionTableInputType.XLS );
 		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( baseDRT, 3, 3 );
 		xlsxDecisionTableConfiguration.addRuleTemplateConfiguration( promoDRT, 18, 3 );
 		xlsxDecisionTableConfiguration.setTrimCell( false );		
 		xlsxResource.setConfiguration( xlsxDecisionTableConfiguration );
-		*/
 		
 		rulesResources.add( xlsxResource );
 
@@ -96,7 +103,7 @@ public class TestDecisionTableBuild {
 		// Start the build process
 		// -----------------------
 
-		AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0" );
+		AFReleaseId releaseId = kieServices.newReleaseId( "test.kjar.build", "test-kjar-build-package", "1.0.0-" + LocalDateTime.now() );
 		System.out.println( "Building the KJar: " + releaseId );
 
 		
@@ -112,13 +119,16 @@ public class TestDecisionTableBuild {
 		
 		System.out.println( "\nPOM contents: \n-------------\n" + pom + "\n" );	
 		
+		
 		// Generate the kmodule.xml
 		// ------------------------
 		
 		KieModuleModel kproj = kieServices.newKieModuleModel();
 		kproj.newKieBaseModel( "KB" ).setDefault( true ) 
-			.addRuleTemplate( "ExamplePolicyPricingTemplateData.xls", "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
-			.addRuleTemplate( "ExamplePolicyPricingTemplateData.xls", "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
+			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
+					          "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
+			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
+					          "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
 			.newKieSessionModel( "KS" ).setDefault( true );
 	
 		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );		
@@ -129,16 +139,16 @@ public class TestDecisionTableBuild {
 
 		KieFileSystem kfs = kieServices.newKieFileSystem();
 
+		for ( Resource resource : rulesResources ) {
+			System.out.println( "Writing resource: " + resource.getTargetPath() );
+			kfs.write( resource );
+		}
+		
 		System.out.println( "Writing resource: " + "kmodule.xml" );
 		kfs.writeKModuleXML( kproj.toXML() );
 
 		System.out.println( "Writing resource: " + "pom.xml" );
 		kfs.writePomXML( pom );
-
-		for ( Resource resource : rulesResources ) {
-			System.out.println( "Writing resource: " + resource.getTargetPath() );
-			kfs.write( resource );
-		}
 
 
 		// Build it
@@ -157,8 +167,15 @@ public class TestDecisionTableBuild {
 			}
 			throw new IllegalArgumentException( "Could not parse knowledge." );
 		}
-
+		
+		
+		// Install it
+		// ----------
+		
 		InternalKieModule internalKieModule = (InternalKieModule) kieBuilder.getKieModule();
+		KieMavenRepository.getKieMavenRepository().installArtifact( releaseId, internalKieModule.getBytes(), pom.getBytes() );
+		
+		System.out.println( "\nInstalled artifact: " + releaseId );
 		
 
 		// Run it
@@ -168,9 +185,11 @@ public class TestDecisionTableBuild {
 		System.out.println( "Running the rules" );
 		System.out.println( "-----------------" );
 
-		KieContainer kieContainer = kieServices.newKieContainer( internalKieModule.getReleaseId() );
-
-		KieBase kieBase = kieContainer.getKieBase();
+		ReleaseId kieReleaseId = kieServices.newReleaseId( releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion() );		
+		System.out.println( "\nRunning rules using version: " + kieReleaseId + "\n");
+		
+		kieServices.newEnvironment();
+		KieContainer kieContainer = kieServices.newKieContainer( kieReleaseId );
 		KieSession kieSession = kieContainer.newKieSession();
 		
         //now create some test data
@@ -186,12 +205,13 @@ public class TestDecisionTableBuild {
         kieSession.insert(policy);
 
 		kieSession.fireAllRules();
-		
-        System.out.println("BASE PRICE IS: " + policy.getBasePrice());
-        System.out.println("DISCOUNT IS: " + policy.getDiscountPercent());   
 
         kieSession.dispose();
-		System.out.println( "TEST COMPLETED" );
-		assert ( true );
+
+        System.out.println( "BASE PRICE IS: " + policy.getBasePrice() );
+        assertThat( policy.getBasePrice(), is( 150 ) );
+        
+        System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
+        assertThat( policy.getDiscountPercent(), is( 1 ) );
 	}
 }
