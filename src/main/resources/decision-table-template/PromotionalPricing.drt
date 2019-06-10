@@ -19,5 +19,13 @@ rule "Discounts_@{row.rowNumber}"
         policy: Policy(type == "@{policyType}")
     then
         policy.applyDiscount(@{discount});
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!! RULE FIRED FOR DISCOUNTS AND APPLIED @{discount} !!!!!!!!!!!!!!!!!!!!!!!!!!");
+end
+
+rule "Test_@{row.rowNumber}"
+	when
+		Driver()
+	then
+		System.out.println("############# YAY! #################");
 end
 end template
