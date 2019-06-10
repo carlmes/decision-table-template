@@ -32,6 +32,7 @@ import java.util.List;
  *    https://access.redhat.com/solutions/2048283
  *    https://stackoverflow.com/a/46159667
  *    https://www.programcreek.com/java-api-examples/?code=IncQueryLabs/smarthome-cep-demonstrator/smarthome-cep-demonstrator-master/runtime/com.incquerylabs.smarthome.eventbus.ruleengine.drools/src/main/java/com/incquerylabs/smarthome/eventbus/ruleengine/drools/DroolsEventBusClient.java
+ *    https://github.com/kiegroup/drools/blob/master/drools-examples/src/main/resources/META-INF/kmodule.xml#L77
  */
 
 public class TestDecisionTableBuild {
