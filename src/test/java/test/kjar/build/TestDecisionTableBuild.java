@@ -91,29 +91,32 @@ public class TestDecisionTableBuild {
 		System.out.println( "Building the KJar: " + releaseId );
 
 		
-		// Generate the Pom file contents
-		// ------------------------------
+		// Generate the pom.xml
+		// --------------------
 
 		String pom = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
 			+ "<project xmlns=\"http://maven.apache.org/POM/4.0.0\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
 			+ "         xsi:schemaLocation=\"http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd\">\n"
-			+ "  <modelVersion>4.0.0</modelVersion>\n" + "\n" + "  <groupId>" + releaseId.getGroupId()
+			+ "  <modelVersion>4.0.0</modelVersion>\n" + "  <groupId>" + releaseId.getGroupId()
 			+ "</groupId>\n" + "  <artifactId>" + releaseId.getArtifactId() + "</artifactId>\n" + "  <version>"
-			+ releaseId.getVersion() + "</version>\n" + "\n" + "</project>";
+			+ releaseId.getVersion() + "</version>\n" + "</project>";
 		
-
-		// Create the KJar
-		// ---------------
-
-		System.out.println( "Defining KJAR kbase and kie session model." );
+		System.out.println( "\nPOM contents: \n-------------\n" + pom + "\n" );	
+		
+		// Generate the kmodule.xml
+		// ------------------------
+		
 		KieModuleModel kproj = kieServices.newKieModuleModel();
-		
 		kproj.newKieBaseModel( "KB" ).setDefault( true ) 
 			.addRuleTemplate( "ExamplePolicyPricingTemplateData.xls", "org/drools/examples/decisiontable/BasePricing.drt", 3, 3 ) 
 			.addRuleTemplate( "ExamplePolicyPricingTemplateData.xls", "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
 			.newKieSessionModel( "KS" ).setDefault( true );
+	
+		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );		
 		
-		System.out.println( "kmodule: \n\n" + kproj.toXML() + "\n" );
+
+		// Create the KJar using KieFileSystem
+		// -----------------------------------
 
 		KieFileSystem kfs = kieServices.newKieFileSystem();
 
@@ -127,11 +130,12 @@ public class TestDecisionTableBuild {
 			System.out.println( "Writing resource: " + resource.getTargetPath() );
 			kfs.write( resource );
 		}
-		
+
 
 		// Build it
 		// --------
 
+		System.out.println( "\n" );
 		System.out.println( "Building the new KJar" );
 		System.out.println( "---------------------" );
 
@@ -151,6 +155,7 @@ public class TestDecisionTableBuild {
 		// Run it
 		// ------
 
+		System.out.println( "\n" );
 		System.out.println( "Running the rules" );
 		System.out.println( "-----------------" );
 
