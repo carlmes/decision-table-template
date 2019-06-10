@@ -109,7 +109,7 @@ public class TestDecisionTableBuild {
 		 * Fix was NOT accepted, so cannot use this?
 		 * 
 		 */
-		
+
 		DecisionTableConfiguration trimCellConfig = KnowledgeBuilderFactory.newDecisionTableConfiguration();
 		trimCellConfig.setInputType( DecisionTableInputType.XLS );
 		trimCellConfig.addRuleTemplateConfiguration( baseDRT, 2, 1 );
@@ -134,13 +134,13 @@ public class TestDecisionTableBuild {
 			+ "  <modelVersion>4.0.0</modelVersion>\n" + "  <groupId>" + releaseId.getGroupId()
 			+ "</groupId>\n" + "  <artifactId>" + releaseId.getArtifactId() + "</artifactId>\n" + "  <version>"
 			+ releaseId.getVersion() + "</version>\n" + "</project>";
-		
+
 		System.out.println( "\nPOM contents: \n-------------\n" + pom + "\n" );	
-		
-		
+
+
 		// Generate the kmodule.xml
 		// ------------------------
-		
+
 		KieModuleModel kproj = kieServices.newKieModuleModel();
 		kproj.newKieBaseModel( "KB" ).setDefault( true ) 
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
@@ -150,9 +150,9 @@ public class TestDecisionTableBuild {
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/trim-cell-test.xlsx", 
 			          		  "org/drools/examples/decisiontable/trim-cell-test.drt", 2, 1 ) 
 			.newKieSessionModel( "KS" ).setDefault( true );
-	
-		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );		
-		
+
+		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );
+
 
 		// Create the KJar using KieFileSystem
 		// -----------------------------------
@@ -163,7 +163,7 @@ public class TestDecisionTableBuild {
 			System.out.println( "Writing resource: " + resource.getTargetPath() );
 			kfs.write( resource );
 		}
-		
+
 		System.out.println( "Writing resource: " + "kmodule.xml" );
 		kfs.writeKModuleXML( kproj.toXML() );
 
@@ -187,16 +187,16 @@ public class TestDecisionTableBuild {
 			}
 			throw new IllegalArgumentException( "Could not parse knowledge." );
 		}
-		
-		
+
+
 		// Install it
 		// ----------
-		
+
 		InternalKieModule internalKieModule = (InternalKieModule) kieBuilder.getKieModule();
 		KieMavenRepository.getKieMavenRepository().installArtifact( releaseId, internalKieModule.getBytes(), pom.getBytes() );
-		
+
 		System.out.println( "\nInstalled artifact: " + releaseId );
-		
+
 
 		// Run it
 		// ------
@@ -207,36 +207,36 @@ public class TestDecisionTableBuild {
 
 		ReleaseId kieReleaseId = kieServices.newReleaseId( releaseId.getGroupId(), releaseId.getArtifactId(), releaseId.getVersion() );		
 		System.out.println( "\nRunning rules using version: " + kieReleaseId + "\n");
-		
+
 		kieServices.newEnvironment();
 		KieContainer kieContainer = kieServices.newKieContainer( kieReleaseId );
 		KieSession kieSession = kieContainer.newKieSession();
-		
-        //now create some test data
-        Driver driver = new Driver();
-        driver.setName( "Tim" );
-        driver.setAge( 19 );
-        driver.setPriorClaims( 0 );
-        driver.setLocationRiskProfile( "LOW" );
-        kieSession.insert(driver);
-        
-        Policy policy = new Policy();
-        policy.setType( "COMPREHENSIVE" );
-        kieSession.insert(policy);
+
+		//now create some test data
+		Driver driver = new Driver();
+		driver.setName( "Tim" );
+		driver.setAge( 19 );
+		driver.setPriorClaims( 0 );
+		driver.setLocationRiskProfile( "LOW" );
+		kieSession.insert(driver);
+
+		Policy policy = new Policy();
+		policy.setType( "COMPREHENSIVE" );
+		kieSession.insert(policy);
 
 		kieSession.fireAllRules();
 
-        // Verify that the example templates (BasePrice and PromotionalPricing) ran successfully        
-        System.out.println( "BASE PRICE IS: " + policy.getBasePrice() );
-        assertThat( policy.getBasePrice(), is( 150 ) );        
-        System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
-        assertThat( policy.getDiscountPercent(), is( 1 ) );
-        
-        // Verify that the trimCell template test ran successfully        
-        Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
-        System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
-        assertThat( ruleNames.size(), is( 2 ) );   
-        
-        kieSession.dispose();
+		// Verify that the example templates (BasePrice and PromotionalPricing) ran successfully        
+		System.out.println( "BASE PRICE IS: " + policy.getBasePrice() );
+		assertThat( policy.getBasePrice(), is( 150 ) );        
+		System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
+		assertThat( policy.getDiscountPercent(), is( 1 ) );
+		
+		// Verify that the trimCell template test ran successfully        
+		Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
+		System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
+		assertThat( ruleNames.size(), is( 2 ) );   
+
+		kieSession.dispose();
 	}
 }
