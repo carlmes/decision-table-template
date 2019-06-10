@@ -213,7 +213,7 @@ public class TestDecisionTableBuild {
 		KieContainer kieContainer = kieServices.newKieContainer( kieReleaseId );
 		KieSession kieSession = kieContainer.newKieSession();
 
-		//now create some test data
+		// Create some test data
 		Driver driver = new Driver();
 		driver.setName( "Tim" );
 		driver.setAge( 19 );
@@ -232,11 +232,6 @@ public class TestDecisionTableBuild {
 		assertEquals( policy.getBasePrice(), 150 );        
 		System.out.println( "DISCOUNT IS: " + policy.getDiscountPercent() );  
 		assertEquals( policy.getDiscountPercent(), 1 );
-		
-		// Verify that the trimCell template test ran successfully        
-		Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
-		System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
-		assertEquals( ruleNames.size(), 2 );   
 
 		kieSession.dispose();
 	}
@@ -255,7 +250,8 @@ public class TestDecisionTableBuild {
 		// Verify that the trimCell template test ran successfully
 		Collection<? extends Object> ruleNames = kieSession.getObjects( new ClassObjectFilter( RuleName.class ) );
 		System.out.println( "Trim Cell test generated " + ruleNames.size() + " rule names" );
-		assertEquals( ruleNames.size(), 2 );   
+		
+		assertEquals( ruleNames.size(), 2 );	// Two of the three rules have empty (blank) cells
 
 		kieSession.dispose();
 	}
