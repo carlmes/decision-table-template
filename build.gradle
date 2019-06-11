@@ -82,12 +82,14 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-data-jpa')
 	compile('org.springframework.boot:spring-boot-starter-web')
 
-	compile group: 'org.kie', name: 'kie-ci', version: '7.18.0.Final-redhat-00004'
-	compile group: 'org.kie', name: 'kie-api', version:  '7.18.0.Final-redhat-00004'
-	compile group: 'org.drools', name: 'drools-decisiontables', version:  '7.18.0.Final-redhat-00004'
-	compile group: 'org.jbpm', name: 'jbpm-bpmn2', version:  '7.18.0.Final-redhat-00004'
+	// Versions: https://access.redhat.com/solutions/3363991
+
+	compile group: 'org.kie', name: 'kie-ci', version: '7.18.0.Final-redhat-00002'
+	compile group: 'org.kie', name: 'kie-api', version:  '7.18.0.Final-redhat-00002'
+	compile group: 'org.drools', name: 'drools-decisiontables', version:  '7.18.0.Final-redhat-00002'
+	compile group: 'org.jbpm', name: 'jbpm-bpmn2', version:  '7.18.0.Final-redhat-00002'
 	//compile group: 'org.drools', name: 'drools-core', version: '7.18.0.Final-redhat-CARL'
-	compile group: 'org.drools', name: 'drools-core', version: '7.18.0.Final-redhat-00004'
+	compile group: 'org.drools', name: 'drools-core', version: '7.18.0.Final-redhat-00002'
 
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 

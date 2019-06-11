@@ -50,10 +50,21 @@ public class TestDecisionTableBuild {
 	@Test
 	public void buildKJarTest() {
 		
+		// "drools.trimCellsInDTable"
+		// --------------------------
+		// Requires Drools 7.18+
+		//
+		// https://docs.jboss.org/drools/release/7.22.0.Final/drools-docs/html_single/#_trimcellsindtableoption
+		// https://github.com/kiegroup/drools/blob/master/drools-decisiontables/src/test/java/org/drools/decisiontable/SpreadsheetIntegrationExampleTest.java#L146
+		
+		System.setProperty( "drools.trimCellsInDTable", "false" );
+		
+		
 		// Remove any previously installed artifact
 		// ----------------------------------------
 		
 		KieMavenRepository.getKieMavenRepository().removeLocalArtifact( releaseId );
+		
 
 		// Define the resources
 		// --------------------
