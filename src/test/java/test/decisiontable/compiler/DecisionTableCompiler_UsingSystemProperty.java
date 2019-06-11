@@ -23,6 +23,14 @@ import org.kie.internal.io.ResourceFactory;
 public class DecisionTableCompiler_UsingSystemProperty {
 
 	public static void main(String[] args) throws Exception {
+				
+		System.out.println( "==============" );
+		System.out.println( " Compiling... " );
+		System.out.println( "==============" );
+
+		InputStream xlsStream = ResourceFactory.newClassPathResource( "trimCell-template-test/trim-cell-test.xlsx" ).getInputStream();
+
+		InputStream drtStream = ResourceFactory.newClassPathResource( "trimCell-template-test/trim-cell-test.drt" ).getInputStream();
 
 		// "drools.trimCellsInDTable"
 		// --------------------------
@@ -33,15 +41,9 @@ public class DecisionTableCompiler_UsingSystemProperty {
 		
 		System.setProperty( "drools.trimCellsInDTable", "false" );
 		
-		
-		System.out.println( "==============" );
-		System.out.println( " Compiling... " );
-		System.out.println( "==============" );
-
-		InputStream xlsStream = ResourceFactory.newClassPathResource( "trimCell-template-test/trim-cell-test.xlsx" ).getInputStream();
-
-		InputStream drtStream = ResourceFactory.newClassPathResource( "trimCell-template-test/trim-cell-test.drt" ).getInputStream();
-
+		// The following constructor should use the system property for default behaviour
+		// But it won't work in the 7.18 code base:
+		// https://github.com/kiegroup/drools/blob/7.18.0.t040/drools-templates/src/main/java/org/drools/template/parser/DefaultTemplateContainer.java#L50
 
 		TemplateContainer drtContainer = new DefaultTemplateContainer( drtStream );
 		

@@ -33,7 +33,8 @@ public class DecisionTableCompiler {
 		InputStream drtStream = ResourceFactory.newClassPathResource( "trimCell-template-test/trim-cell-test.drt" ).getInputStream();
 
 		// See: https://access.redhat.com/solutions/2048283
-		// The following "false" parameter disables the "discard the line when data for @{xxx} is empty"
+		// The following "false" parameter in the DefaultTemplateContainer() constructor
+		// disables the logic that will discard the line when data for @{xxx} is empty
 
 		TemplateContainer drtContainer = new DefaultTemplateContainer( drtStream, false );
 
