@@ -17,10 +17,10 @@ rule "@{RULE_NAME}_@{row.rowNumber}"
 			
 		@if{EMPTY_CELL != empty}
 			System.out.println( "   Sometimes empty cell: @{EMPTY_CELL}" );
+		@else{}
 			RuleName ruleName = new RuleName();
 			ruleName.setRuleName( "@{RULE_NAME}" );
 			insert( ruleName );
-		@else{}
 			System.out.println( "   Sometimes empty cell: EMPTY!!!" );
 		@end{}
 		

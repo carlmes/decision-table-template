@@ -103,7 +103,7 @@ public class TestDecisionTableBuild {
 
 		rulesResources.add( xlsxResource );
 
-		Resource trimcellDRT = ResourceFactory.newFileResource( new File( "src/main/resources/trimCell-template-test/trim-cell-test.drt" ) );
+		Resource trimcellDRT = ResourceFactory.newFileResource( new File( "src/main/resources/trimCell-template-test/trim-cell-test2.drt" ) );
 		trimcellDRT.setResourceType( ResourceType.determineResourceType( trimcellDRT.getSourcePath() ) );
 		trimcellDRT.setTargetPath( "org/drools/examples/decisiontable/" + new File( trimcellDRT.getSourcePath() ).getName() );
 		rulesResources.add( trimcellDRT );
@@ -159,7 +159,7 @@ public class TestDecisionTableBuild {
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/ExamplePolicyPricingTemplateData.xls", 
 			                  "org/drools/examples/decisiontable/PromotionalPricing.drt", 18, 3 ) 
 			.addRuleTemplate( "org/drools/examples/decisiontable-template/trim-cell-test.xlsx", 
-			                  "org/drools/examples/decisiontable/trim-cell-test.drt", 2, 1 ) 
+			                  "org/drools/examples/decisiontable/trim-cell-test2.drt", 2, 1 ) 
 			.newKieSessionModel( "KS" ).setDefault( true );
 
 		System.out.println( "\nKMODULE contents: \n-----------------\n" + kproj.toXML() + "\n" );
