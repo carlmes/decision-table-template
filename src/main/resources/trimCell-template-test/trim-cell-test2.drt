@@ -9,9 +9,9 @@ template "Trim Cell Test"
 
 rule "@{RULE_NAME}_@{row.rowNumber}"
 	when
-		//@if{EMPTY_CELL != empty}
+		@if{EMPTY_CELL != empty}
 			eval( 1 == 1 )
-		//@end{}
+		@end{}
 	then
 		System.out.println( "Template included rule: @{RULE_NAME}" );
 			
