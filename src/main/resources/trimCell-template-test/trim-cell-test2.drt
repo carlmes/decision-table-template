@@ -9,18 +9,18 @@ template "Trim Cell Test"
 
 rule "@{RULE_NAME}_@{row.rowNumber}"
 	when
-		//@if{COMPARABLE_GROUPING_MATCH != empty}
+		//@if{EMPTY_CELL != empty}
 			eval( 1 == 1 )
 		//@end{}
 	then
 		System.out.println( "Template included rule: @{RULE_NAME}" );
 			
-		@if{COMPARABLE_GROUPING_MATCH != empty}
+		@if{EMPTY_CELL != empty}
 			System.out.println( "   Sometimes empty cell: @{EMPTY_CELL}" );
-		//	RuleName ruleName = new RuleName();
-		//	ruleName.setRuleName( "@{RULE_NAME}" );
-		//	insert( ruleName );
-		//@else{}
+			RuleName ruleName = new RuleName();
+			ruleName.setRuleName( "@{RULE_NAME}" );
+			insert( ruleName );
+		@else{}
 			System.out.println( "   Sometimes empty cell: EMPTY!!!" );
 		@end{}
 		
