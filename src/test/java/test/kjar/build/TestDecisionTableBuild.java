@@ -188,7 +188,7 @@ public class TestDecisionTableBuild {
 		System.out.println( "\n" );
 		System.out.println( "Building the new KJar" );
 		System.out.println( "---------------------" );
-
+		
 		KieBuilder kieBuilder = kieServices.newKieBuilder( kfs ).buildAll();
 
 		List<Message> errors = kieBuilder.getResults().getMessages( Message.Level.ERROR );
